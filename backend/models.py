@@ -3,6 +3,30 @@ from dateutil import tz
 
 from backend import db, ma
 from sqlalchemy.dialects.postgresql.json import JSONB
+# {
+#     "status": 200,
+#     "errors": {},
+#     "data": {
+#         "url": {
+#         },
+#         "response":
+#             {
+#             },
+#         "request": {
+#         } }
+# }
+# called_url
+# schema
+# method
+# CONNECT
+# DELETE
+# GET
+# HEAD
+# OPTIONS
+# PATCH
+# POST
+# PUT
+# TRACE
 
 class Visitor(db.Model):
     """ the people detected by the node
