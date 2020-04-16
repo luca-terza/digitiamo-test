@@ -11,7 +11,7 @@ class Mocked:
 
     def get(self):
         import os
-        script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         rel_path = "snapshot.json"
         abs_file_path = os.path.join(script_dir, rel_path)
 
@@ -23,31 +23,29 @@ def mocked_fb_db(fake_path):
     return Mocked(fake_path)
 
 
-@pytest.mark.usefixtures('app', 'headers')
+@pytest.mark.usefixtures('app', 'client')
 class TestApi:
-    def _call_api(self, schema, method, url, client, headers, code):
+    def _call_api(self, schema, method, request_url, client, code):
         # http_method = getattr(client, method)
-        response = client.get(url, headers=headers, follow_redirects=True)
+        url = '/api/v1.0/request_url'
+        response = client.get(url, schema, method, request_url, follow_redirects=True)
         assert response.status_code == code, f" {method} %s returned %d" % (url, response.status_code)
         data = json.loads(response.data)
         return data
 
-    def _get_api(self, schema, method, url, client, headers, code):
-        response = client.get(url, headers=headers, follow_redirects=True)
+    def _get_api(self, url, client, code):
+        response = client.get(url, follow_redirects=True)
         assert response.status_code == code, "GET %s returned %d" % (url, response.status_code)
         data = json.loads(response.data)
         return data
 
-    def _post_api(self, url, client, headers, code):
-        response = client.post(url, headers=headers, follow_redirects=True)
+    def _post_api(self, url, client, code):
+        response = client.post(url, follow_redirects=True)
         assert response.status_code == code, "POST %s returned %d" % (url, response.status_code)
         data = json.loads(response.data)
         return data
 
-    def test_get_call(self, client, headers):
-        url = '/api/v1.0/access_url'
-        data = self._get_api(url, 'http', 'GET', client, headers, 200)
-        assert len(data['nodes']) > 0
-
-
-
+    def test_get_call(self, client):
+        url = '/api/v1.0/request_url/GET/https/www.google.com'
+        data = self._get_api(url, client, 200)
+        assert len(data) > 0

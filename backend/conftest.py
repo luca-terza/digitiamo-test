@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """Defines fixtures available to all tests."""
-from backend import create_app, db as _db
-
 
 import pytest
+from backend import create_app, db as _db
 
 
 @pytest.fixture(scope='session', autouse=True)

@@ -15,7 +15,6 @@ __api_bp = Blueprint('api', __name__)
 api = Api(__api_bp)
 r_log = logging.getLogger('digi-test')
 r_log.info(f'working in => {os.getcwd()}')
-# Setup Flask-User
 app = Flask(__name__, instance_relative_config=False)
 
 
@@ -36,8 +35,8 @@ def create_app(pyenv=None):
     from .models import Call, CallResult
     ma.init_app(app)
     with app.app_context():
-        from .api.v1_0 import digitest_api as rest_api
-        # api.add_resource(rest_api.LangRes, '/locale/<r_locale>/<node_id>')
+        from .dgt_api.v1_0 import digitest_api as rest_api
+        api.add_resource(rest_api.CallUrlRes, '/api/v1.0/request_url/<method>/<schema>/<request_url>')
         #
         # api.add_resource(rest_api.NodeListRes, '/nodesList')
         # api.add_resource(rest_api.NodeListApi, '/api/v1.0/nodes_list')
@@ -62,5 +61,5 @@ def create_app(pyenv=None):
         #
         # api.add_resource(rest_api.UpdateDbRes, '/updateDb/<node_id>')
         # api.add_resource(rest_api.UpdateDbApi, '/api/v1.0/updateDb')
-        # app.register_blueprint(__api_bp)
+        app.register_blueprint(__api_bp)
         return app
