@@ -1,53 +1,40 @@
-import requests, json
+import json
+from urllib.parse import urlparse
+
+import requests
+from flask import request
 from flask_restful import Resource
-from marshmallow import Schema, fields
+
+from backend.models import Call, CallResult
 
 
-class RequestIterator:
-    """Class to implement an iterator
-    while a redirect is returned"""
-
-    def __init__(self, method, schema, request_url):
-        self.http_method = getattr(requests, method.lower())
-        self.schema = schema
-        self.request_url = request_url
-        # self.results = list()
-
-    def __iter__(self):
-        r = self.http_method(f"{self.schema}://{self.request_url}", allow_redirects=False)
-        return self
-
-    def __next__(self):
-        if self.n <= self.max:
-            result = 2 ** self.n
-            self.n += 1
-            return result
-        else:
-            raise StopIteration
-
-# for h in r.history:
-#     ...     print(h.headers['Server'])
-# URL INFO
-# Domain
-# scheme
-# path
-#
-# Response 0
-# http/version status_code
-# Location or Date
-# Server/version
-
-class MeanVisitorSchema(Schema):
-    requested_url = fields.Url()
-    headers = fields.Dict()
-    server = fields.String()
+def safe_param(d, key):
+    try:
+        return d[key]
+    except KeyError:
+        return None
 
 
 class CallUrlRes(Resource):
 
-    def get(self, method, schema, request_url):
+    def _set_call_result(self, h):
+        CallResult(status_code=h.status_code,
+                   location=safe_param(h.headers, 'location'),
+                   date=safe_param(h.headers, 'date'),
+                   server=safe_param(h.headers, 'server')
+                   )
+
+    def get(self, method):
+        json_query = request.args
+        requested_url = json.loads(json_query['query'])['requested_url']
         http_method = getattr(requests, method.lower())
-        r = http_method(f"{schema}://{request_url}", allow_redirects=True)
-        print(r.status_code, r.headers['Location'])
+        parsed_url = urlparse(requested_url)
+        call = Call(domain=parsed_url.netloc,
+                    scheme=parsed_url.scheme,
+                    method=method,
+                    path=parsed_url.path)
+        r = http_method(f"{requested_url}", allow_redirects=True)
+        for h in r.history:
+            call.call_results.append(self._set_call_result(h))
+        call.call_results.append(self._set_call_result(r))
         return json.dumps(r.headers.__dict__['_store'])
-        # r_log.info(f"to be implemented: {method} - {schema}://{request_url}")

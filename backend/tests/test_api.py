@@ -46,6 +46,6 @@ class TestApi:
         return data
 
     def test_get_call(self, client):
-        url = '/api/v1.0/request_url/GET/http/www.instagram.com'
+        url = '/api/v1.0/request_url/GET?query={ "requested_url": "http://www.instagram.com"} '
         data = self._get_api(url, client, 200)
         assert len(data) > 0

@@ -36,7 +36,7 @@ def create_app(pyenv=None):
     ma.init_app(app)
     with app.app_context():
         from .dgt_api.v1_0 import digitest_api as rest_api
-        api.add_resource(rest_api.CallUrlRes, '/api/v1.0/request_url/<method>/<schema>/<request_url>')
+        api.add_resource(rest_api.CallUrlRes, '/api/v1.0/request_url/<method>')
         #
         # api.add_resource(rest_api.NodeListRes, '/nodesList')
         # api.add_resource(rest_api.NodeListApi, '/api/v1.0/nodes_list')
