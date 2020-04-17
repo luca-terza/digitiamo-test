@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 680ddce3f293
+Revision ID: ec7d9c095804
 Revises: 
-Create Date: 2020-04-15 16:06:27.518600
+Create Date: 2020-04-17 16:13:29.738183
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '680ddce3f293'
+revision = 'ec7d9c095804'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,17 +22,16 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('start_timestamp', sa.DateTime(), nullable=False),
     sa.Column('end_timestamp', sa.DateTime(), nullable=False),
-    sa.Column('called_url', sa.String(length=256), nullable=True),
-    sa.Column('request', sa.String(length=512), nullable=True),
-    sa.Column('response', sa.CLOB(), nullable=True),
-    sa.Column('schema', sa.String(length=8), nullable=True),
+    sa.Column('requested_url', sa.String(length=256), nullable=True),
+    sa.Column('domain', sa.String(length=256), nullable=True),
+    sa.Column('scheme', sa.String(length=16), nullable=True),
     sa.Column('method', sa.String(length=16), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('call_result',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('call_id', sa.Integer(), nullable=True),
-    sa.Column('status', sa.Integer(), nullable=True),
+    sa.Column('status_code', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['call_id'], ['call.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
