@@ -17,7 +17,7 @@ from sqlalchemy.orm import relationship
 
 
 class CallResultSchema(Schema):
-    status_code = fields.Int()
+    status_code = fields.String()
     location = fields.String(required=False)
     date = fields.String(required=False)
     # date = fields.Date(required=False, dateformat="%d/%m/%Y")
@@ -40,13 +40,12 @@ class Call(db.Model):
     """
     __tablename__ = 'call'
     id = db.Column(db.Integer, primary_key=True)
-    start_timestamp = db.Column(db.DateTime(), nullable=False)
-    end_timestamp = db.Column(db.DateTime(), nullable=False)
+    handle = db.Column(db.String(256))
     requested_url = db.Column(db.String(256))
     domain = db.Column(db.String(256))
     scheme = db.Column(db.String(16))
     method = db.Column(db.String(16))
-    path = fields.String()
+    path = db.Column(db.String(256))
     call_results = relationship("CallResult", backref="call")
 
 
@@ -57,7 +56,7 @@ class CallResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     call_id = db.Column(
         db.Integer, db.ForeignKey('call.id'))
-    status_code = db.Column(db.Integer())
-    location = db.String(db.String(256))
-    server = db.String(db.String(256))
-    date = db.Column(db.DateTime())
+    status_code = db.Column(db.String(256))
+    location = db.Column(db.String(256))
+    server = db.Column(db.String(256))
+    date = db.Column(db.String(256))

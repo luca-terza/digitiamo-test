@@ -1,16 +1,20 @@
 import json
+import random
 from urllib.parse import urlparse
 
 import requests
 from flask import request
 from flask_restful import Resource
-
-from backend.models import Call, CallResult, CallSchema
 from hyper.contrib import HTTP20Adapter
+from hyper.http11.response import HTTP11Response
+from requests.cookies import extract_cookies_to_jar
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
 from requests.utils import get_encoding_from_headers
-from requests.cookies import extract_cookies_to_jar
+
+from backend import db
+from backend.models import Call, CallResult, CallSchema
+
 
 class MyHTTP20Adapter(HTTP20Adapter):
     def _my_iter_raw(self, items):
@@ -23,7 +27,10 @@ class MyHTTP20Adapter(HTTP20Adapter):
         for item in items:
             new_item = list()
             for i in item:
-                new_item.append(i.decode())
+                try:
+                    new_item.append(i.decode())
+                except AttributeError:
+                    print("error")
             yield tuple(new_item)
 
     def build_response(self, request, resp):
@@ -98,26 +105,43 @@ class MyHTTP20Adapter(HTTP20Adapter):
 
         return response
 
+
 def safe_param(d, key):
     try:
         return d[key]
     except KeyError:
-        return None
+        return ''
+
+
+def safe_decode(s_or_b):
+    try:
+        return s_or_b.decode()
+    except AttributeError:
+        return s_or_b
 
 
 def get_last_date(h):
     try:
-        return h.raw.headers._container['date'][len(h.raw.headers._container['date']) - 1]
+        return h['date']
     except KeyError:
-        return None
+        return ''
 
 
 class CallUrlRes(Resource):
+    def _create_random_handle(self):
+        return str(hex(random.randint(10000000, 90000000)))[2:]
 
     def _set_call_result(self, h):
-        return CallResult(status_code=h.status_code,
+        protocol = 'HTTP/'
+
+        if type(h.raw) == HTTP11Response:
+            protocol += '1.1'
+        else:
+            protocol += '2'
+
+        return CallResult(status_code=f"{protocol} {h.status_code} {safe_decode(h.reason)}",
                           location=safe_param(h.headers, 'location'),
-                          date='test',
+                          date=get_last_date(h.headers),
                           server=safe_param(h.headers, 'server')
                           )
 
@@ -125,10 +149,12 @@ class CallUrlRes(Resource):
         json_query = request.args
         requested_url = json.loads(json_query['query'])['requested_url']
         parsed_url = urlparse(requested_url)
+
         call = Call(domain=parsed_url.netloc,
                     scheme=parsed_url.scheme,
                     method=method,
-                    path=parsed_url.path)
+                    path=(parsed_url.path or '/'),
+                    requested_url=requested_url)
         s = requests.Session()
         s.mount(requested_url, MyHTTP20Adapter())
         http_method = getattr(s, method.lower())
@@ -136,5 +162,10 @@ class CallUrlRes(Resource):
         for h in r.history:
             call.call_results.append(self._set_call_result(h))
         call.call_results.append(self._set_call_result(r))
+        db.session.add(call)
+        db.session.commit()
+        call.handle = f"{self._create_random_handle()}{call.id}"
+        db.session.add(call)
+        db.session.commit()
         schema = CallSchema()
         return {'result': schema.dump(call)}, r.status_code
