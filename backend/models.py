@@ -19,7 +19,8 @@ from sqlalchemy.orm import relationship
 class CallResultSchema(Schema):
     status_code = fields.Int()
     location = fields.String(required=False)
-    date = fields.Date(required=False, dateformat="%d/%m/%Y")
+    date = fields.String(required=False)
+    # date = fields.Date(required=False, dateformat="%d/%m/%Y")
     server = fields.String(required=False)
 
 

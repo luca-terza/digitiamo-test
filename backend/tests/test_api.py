@@ -1,6 +1,7 @@
 import json
 import os
 from base64 import b64encode
+from pprint import pprint
 
 import pytest
 
@@ -23,7 +24,21 @@ def mocked_fb_db(fake_path):
     return Mocked(fake_path)
 
 
-@pytest.mark.usefixtures('app', 'client')
+@pytest.fixture
+def queries():
+    _queries = [
+        {"requested_url": "http://www.instagram.com"},
+        {"requested_url": "http://www.google.com"},
+        {"requested_url": "https://www.instagram.com"},
+        {"requested_url": "https://google.com"},
+        {"requested_url": "https://python.org"},
+        {"requested_url": "https://www.google.com"},
+
+    ]
+    return _queries
+
+
+@pytest.mark.usefixtures('app', 'client', 'queries')
 class TestApi:
     def _call_api(self, schema, method, request_url, client, code):
         # http_method = getattr(client, method)
@@ -45,7 +60,20 @@ class TestApi:
         data = json.loads(response.data)
         return data
 
-    def test_get_call(self, client):
-        url = '/api/v1.0/request_url/GET?query={ "requested_url": "http://www.instagram.com"} '
+
+    def _call_url(self, method, query, client):
+        url = f'/api/v1.0/request_url/{method}?query={query} '
         data = self._get_api(url, client, 200)
+        print('\n-------------')
+        pprint(data)
         assert len(data) > 0
+
+    def test_get_call(self, client, queries):
+        print('\n***************************************')
+        for q in queries:
+            self._call_url('GET', json.dumps(q), client)
+
+    def test_head_call(self, client, queries):
+        print('\n***************************************')
+        for q in queries:
+            self._call_url('HEAD', json.dumps(q), client)
