@@ -1,8 +1,8 @@
 import json
 import random
-from urllib.parse import urlparse
-
 import requests
+import re
+from urllib.parse import urlparse
 from flask import request
 from flask_restful import Resource
 from hyper.contrib import HTTP20Adapter
@@ -12,7 +12,7 @@ from requests.models import Response
 from requests.structures import CaseInsensitiveDict
 from requests.utils import get_encoding_from_headers
 
-from backend import db
+from backend import db, ip_cache
 from backend.models import Call, CallResult, CallSchema
 
 
@@ -122,7 +122,7 @@ def safe_decode(s_or_b):
 
 def get_last_date(h):
     try:
-        return h['date']
+        return re.split("GMT, ", h['date'])[-1]
     except KeyError:
         return ''
 
@@ -146,6 +146,9 @@ class CallUrlRes(Resource):
                           )
 
     def get(self, method):
+        if not ip_cache.put(request.remote_addr):
+            return {'error': 'address not allowed'}, 404
+
         json_query = request.args
         requested_url = json.loads(json_query['query'])['requested_url']
         parsed_url = urlparse(requested_url)

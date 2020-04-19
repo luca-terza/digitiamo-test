@@ -1,6 +1,10 @@
+from datetime import datetime
+
 from marshmallow import Schema, fields
-from backend import db, ma
 from sqlalchemy.orm import relationship
+
+from backend import db
+
 
 # called_url
 # schema
@@ -40,13 +44,14 @@ class Call(db.Model):
     """
     __tablename__ = 'call'
     id = db.Column(db.Integer, primary_key=True)
-    handle = db.Column(db.String(256))
+    handle = db.Column(db.String(256), unique=True, index=True)
     requested_url = db.Column(db.String(256))
     domain = db.Column(db.String(256))
     scheme = db.Column(db.String(16))
     method = db.Column(db.String(16))
     path = db.Column(db.String(256))
     call_results = relationship("CallResult", backref="call")
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
 
 
 class CallResult(db.Model):

@@ -8,6 +8,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask import Blueprint
 from flask_migrate import Migrate
+from backend.helpers import IPCache
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -16,6 +17,7 @@ api = Api(__api_bp)
 r_log = logging.getLogger('digi-test')
 r_log.info(f'working in => {os.getcwd()}')
 app = Flask(__name__, instance_relative_config=False)
+ip_cache = IPCache(max_size=50)
 
 
 def down_case_first_letter(s): return s[:1].upper() + s[1:] if s else ''

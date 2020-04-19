@@ -1,27 +1,12 @@
 import json
-import os
-from base64 import b64encode
+import random
+import flask
 from pprint import pprint
-
 import pytest
 
 
-class Mocked:
-    def __init__(self, path):
-        self.path = path
-
-    def get(self):
-        import os
-        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
-        rel_path = "snapshot.json"
-        abs_file_path = os.path.join(script_dir, rel_path)
-
-        mocked_file = open(abs_file_path, "r")
-        return json.loads(mocked_file.read())
-
-
-def mocked_fb_db(fake_path):
-    return Mocked(fake_path)
+def mocked_remote_addr():
+    return f"127.0.0.{random.randint(1, 5000)}"
 
 
 @pytest.fixture
@@ -33,7 +18,6 @@ def queries():
         {"requested_url": "https://google.com"},
         {"requested_url": "https://python.org"},
         {"requested_url": "https://www.google.com"},
-
     ]
     return _queries
 
@@ -61,19 +45,30 @@ class TestApi:
         return data
 
 
-    def _call_url(self, method, query, client):
+    def _call_url(self, method, query, client, asserted_staus_code):
         url = f'/api/v1.0/request_url/{method}?query={query} '
-        data = self._get_api(url, client, 200)
+        data = self._get_api(url, client, asserted_staus_code)
         print('\n-------------')
         pprint(data)
         assert len(data) > 0
 
-    def test_get_call(self, client, queries):
-        print('\n***************************************')
-        for q in queries:
-            self._call_url('GET', json.dumps(q), client)
+    def test_get_call(self, client, queries, mocker):
+        mocker.patch.object(flask.Request, 'remote_addr', mocked_remote_addr)
 
-    def test_head_call(self, client, queries):
         print('\n***************************************')
         for q in queries:
-            self._call_url('HEAD', json.dumps(q), client)
+            self._call_url('GET', json.dumps(q), client, 200)
+
+    def test_get_call_failure(self, client, queries, ):
+        print('\n***************************************')
+        #first is ok
+        self._call_url('GET', json.dumps({"requested_url": "https://duckduckgo.com"}), client, 200)
+        #next are from the same remote address within the timeout
+        for q in queries:
+            self._call_url('GET', json.dumps(q), client, 404)
+
+    def test_post_call(self, client, queries, mocker):
+        mocker.patch.object(flask.Request, 'remote_addr', mocked_remote_addr)
+        print('\n***************************************')
+        self._call_url('POST', json.dumps({"requested_url": "http://www.instagram.com"}), client, 200)
+        self._call_url('POST', json.dumps({"requested_url": "http://www.google.com"}), client, 405)
