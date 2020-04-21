@@ -1,4 +1,3 @@
-
 import os
 import logging
 
@@ -6,11 +5,10 @@ from flask import Flask
 from flask_marshmallow import Marshmallow
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
-from flask import Blueprint
+from flask import Blueprint, render_template
 from flask_migrate import Migrate
 from backend.helpers import IPCache
 from flask_cors import CORS
-
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -18,12 +16,21 @@ __api_bp = Blueprint('api', __name__)
 api = Api(__api_bp)
 r_log = logging.getLogger('digi-test')
 r_log.info(f'working in => {os.getcwd()}')
-app = Flask(__name__, instance_relative_config=False)
-CORS(app)
+app = Flask(__name__,
+            static_folder="../frontend/dist/static",
+            template_folder="../frontend/dist")
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 ip_cache = IPCache(max_size=50)
+views_bp = Blueprint('call_url_views', __name__)
 
 
 def down_case_first_letter(s): return s[:1].upper() + s[1:] if s else ''
+
+
+@views_bp.route('/', defaults={'path': ''})
+@views_bp.route('/<path:path>')
+def catch_all(path):
+    return render_template("index.html")
 
 
 def create_app(pyenv=None):
@@ -43,4 +50,5 @@ def create_app(pyenv=None):
         from .dgt_api.v1_0 import digitest_api as rest_api
         api.add_resource(rest_api.CallUrlRes, '/api/v1.0/request_url/<method>')
         app.register_blueprint(__api_bp)
+        app.register_blueprint(views_bp)
         return app
