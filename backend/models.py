@@ -35,6 +35,9 @@ class CallSchema(Schema):
     scheme = fields.String()
     method = fields.String()
     path = fields.String()
+    status = fields.Int()
+    status_msg = fields.String()
+    errors = fields.String()
     call_results = fields.List(fields.Nested(CallResultSchema))
 
 
@@ -51,6 +54,9 @@ class Call(db.Model):
     method = db.Column(db.String(16))
     path = db.Column(db.String(256))
     call_results = relationship("CallResult", backref="call")
+    status = db.Column(db.Integer)
+    status_msg = db.Column(db.String(256))
+    errors = db.Column(db.String(1024))
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
 
 

@@ -145,6 +145,13 @@ class CallUrlRes(Resource):
                           server=safe_param(h.headers, 'server')
                           )
 
+    def _status_from_ex(self, e):
+        ex_dict = {requests.exceptions.MissingSchema: 406, 'default': 404}
+        try:
+            return ex_dict[type(e)]
+        except KeyError:
+            return ex_dict['default']
+
     def _handle_request(self, method, requested_url):
         if not ip_cache.put(request.remote_addr):
             return {'error': 'address not allowed'}, 404
@@ -155,21 +162,32 @@ class CallUrlRes(Resource):
                     scheme=parsed_url.scheme,
                     method=method,
                     path=(parsed_url.path or '/'),
-                    requested_url=requested_url)
+                    requested_url=requested_url,
+                    errors='')
         s = requests.Session()
         s.mount(requested_url, MyHTTP20Adapter())
         http_method = getattr(s, method.lower())
-        r = http_method(f"{requested_url}", allow_redirects=True)
-        for h in r.history:
-            call.call_results.append(self._set_call_result(h))
-        call.call_results.append(self._set_call_result(r))
+        r = None
+        try:
+            r = http_method(f"{requested_url}", allow_redirects=True)
+            for h in r.history:
+                call.call_results.append(self._set_call_result(h))
+            call.call_results.append(self._set_call_result(r))
+            call.status = r.status_code
+        except Exception as e:
+            if hasattr(e, 'message'):
+                msg = e.message
+            else:
+                msg = e
+            call.errors += f"'error': '{msg}'"
+            call.status = self._status_from_ex(e)
         db.session.add(call)
         db.session.commit()
         call.handle = f"{self._create_random_handle()}{call.id}"
         db.session.add(call)
         db.session.commit()
         schema = CallSchema()
-        return {'result': schema.dump(call)}, r.status_code
+        return {'result': schema.dump(call)}, call.status
 
     def get(self, method):
         json_query = request.args

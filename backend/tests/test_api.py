@@ -58,6 +58,7 @@ class TestApi:
         print('\n-------------')
         pprint(resp)
         assert len(resp) > 0
+        return resp['result']
 
     def test_get_call_by_post(self, client, queries, mocker):
         mocker.patch.object(flask.Request, 'remote_addr', mocked_remote_addr)
@@ -86,3 +87,11 @@ class TestApi:
         print('\n***************************************')
         self._call_url_by_get('POST', json.dumps({"requested_url": "http://www.instagram.com"}), client, 200)
         self._call_url_by_get('POST', json.dumps({"requested_url": "http://www.google.com"}), client, 405)
+
+    def test_single_get_call_by_post(self, client, queries, mocker):
+        mocker.patch.object(flask.Request, 'remote_addr', mocked_remote_addr)
+
+        print('\n***************************************')
+        # missing schema
+        result = self._call_url_by_post('GET', json.dumps({"requested_url": "www.google.com"}), client, 406)
+        assert 'No schema supplied' in result['errors']
