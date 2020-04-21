@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Blueprint
 from flask_migrate import Migrate
 from backend.helpers import IPCache
+from flask_cors import CORS
+
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -17,6 +19,7 @@ api = Api(__api_bp)
 r_log = logging.getLogger('digi-test')
 r_log.info(f'working in => {os.getcwd()}')
 app = Flask(__name__, instance_relative_config=False)
+CORS(app)
 ip_cache = IPCache(max_size=50)
 
 

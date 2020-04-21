@@ -145,12 +145,10 @@ class CallUrlRes(Resource):
                           server=safe_param(h.headers, 'server')
                           )
 
-    def get(self, method):
+    def _handle_request(self, method, requested_url):
         if not ip_cache.put(request.remote_addr):
             return {'error': 'address not allowed'}, 404
 
-        json_query = request.args
-        requested_url = json.loads(json_query['query'])['requested_url']
         parsed_url = urlparse(requested_url)
 
         call = Call(domain=parsed_url.netloc,
@@ -172,3 +170,12 @@ class CallUrlRes(Resource):
         db.session.commit()
         schema = CallSchema()
         return {'result': schema.dump(call)}, r.status_code
+
+    def get(self, method):
+        json_query = request.args
+        requested_url = json.loads(json_query['query'])['requested_url']
+        return self._handle_request(method, requested_url)
+
+    def post(self, method):
+        requested_url = json.loads(request.data.decode())['requested_url']
+        return self._handle_request(method, requested_url)
