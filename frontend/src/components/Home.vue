@@ -25,46 +25,37 @@
       </b-col>
     </b-form-row>
 
-    <b-row  offset class="text-left p-4" v-if="response != ''">
-        <b-col cols="3" class="border rounded">
-          <ul>
-            <li class="text-dark url-info-title">
-                <b-col >URL INFO</b-col>
-
+    <b-row  offset class="text-left p-4 result-row" >
+        <b-col cols="3"  v-if="response.status">
+          <ul class="main-result-box">
+            <li class="result-title">URL INFO</li>
+            <li >
+              <ul class="result-element-section">
+                <li class="result-element-title">DOMAIN</li>
+                <li class="result-element">{{this.response.domain}}</li>
+              </ul>
             </li>
-            <li class="text-dark url-info-section-title">
-              <b-row>
-                <b-col >DOMAIN</b-col>
-              </b-row>
-              <b-row>
-                <b-col>{{this.response.domain}}</b-col>
-              </b-row>
+            <li >
+              <ul class="result-element-section">
+                <li class="result-element-title">SCHEME</li>
+                <li class="result-element">{{this.response.scheme}}</li>
+              </ul>
             </li>
-            <li class="text-dark url-info-section-title">
-              <b-row>
-                <b-col >SCHEME</b-col>
-              </b-row>
-              <b-row>
-                <b-col>{{this.response.scheme}}</b-col>
-              </b-row>
-            </li>
-            <li class="text-dark url-info-section-title">
-              <b-row>
-                <b-col >PATH</b-col>
-              </b-row>
-              <b-row>
-                <b-col>{{this.response.path}}</b-col>
-              </b-row>
+            <li >
+              <ul class="result-element-section">
+                <li class="result-element-title">PATH</li>
+                <li class="result-element">{{this.response.path}}</li>
+              </ul>
             </li>
           </ul>
         </b-col>
-        <b-col v-for="response in this.response.call_results" v-bind:key="response.status_code" cols="3" class="border rounded p-1">
-          <ul >
-            <li>RESPONSE</li>
-            <li v-if="response.date">date: {{response.date}}</li>
-            <li >{{ response.status_code }}</li>
-            <li v-if="response.location">Location: {{response.location}}</li>
-            <li v-if="response.server">Server: {{response.server}}</li>
+        <b-col v-for="response in response.call_results" v-bind:key="response.status" cols="3" >
+          <ul class="result-box">
+            <li class="result-title">RESPONSE</li>
+            <li class="result-detail" v-if="response.date">date: {{response.date}}</li>
+            <li class="result-detail">{{ response.status_code }}</li>
+            <li class="result-detail" v-if="response.location">Location: {{response.location}}</li>
+            <li class="result-detail" v-if="response.server">Server: {{response.server}}</li>
           </ul>
         </b-col>
     </b-row>
@@ -95,7 +86,7 @@
           url: ''
         },
         response_debug: '',
-        response: {}
+        response: {'status': 'debug'}
       }
     },
     mounted () {
@@ -128,32 +119,65 @@
   }
 </script>
 
-<style >
-  h1, h2 {
-    font-weight: normal;
-  }
-
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-
-  li {
-    display: inline-block;
-    margin: 0 10px;
-  }
-
-  a {
-    color: #42b983;
-  }
-
+<style lang="scss">
   textarea {
     width: 600px;
     height: 200px;
   }
-  .url-info-section-title {
-    background-color: lightgray;
-    padding-bottom: 2px;
-    margin-bottom: 2px;
+  .rounded_box{
+    border: 1px solid #f6f6f6;
+    border-radius:.25rem
   }
+  .slight-indent{
+    padding: 0 0 2px 5px;
+  }
+
+  $box-light-color: #f6f6f6;
+  .result-box{
+    @extend .rounded_box;
+    min-height: 400px;
+    padding: 0 0 0 0;
+  }
+  .main-result-box{
+    @extend .result-box;
+    background: $box-light-color;
+  }
+  .result-detail {
+    padding: 10px 0 10px 5px;
+    background: $box-light-color;
+    margin-bottom: 1px;
+  }
+  .result_element {
+    font-size: 0.9em;
+  }
+  .text-dark{
+    font-weight: bold;
+  }
+  .result-title {
+    @extend .slight-indent;
+    font-size: 1.1em;
+    padding-bottom: 20px;
+  }
+  .result-element-title {
+    @extend .text-dark;
+  }
+  .result-element-section {
+    background-color: #e9e9e9;
+    @extend .slight-indent
+  }
+
+  body{
+    font-size: 14px;
+    font-family: Arial,sans-serif;
+  }
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+  ul li {
+    display: block;
+    padding: 0 0 2px 0px ;
+    text-decoration: none;
+  }
+
 </style>
