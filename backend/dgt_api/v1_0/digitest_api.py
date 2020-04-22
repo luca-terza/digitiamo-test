@@ -61,12 +61,19 @@ class CallUrlRes(Resource):
     def _get_reason(self, status):
         return HTTPStatus(status).description
 
+    def _sanitize_url(self, url):
+        p = re.compile("(http|https):\/\/")
+        if not p.search(url):
+            url = "http://"+url
+        return url
+
     def _handle_request(self, method, requested_url):
         if not ip_cache.put(request.remote_addr):
             return {'error': 'address not allowed'}, 404
 
-        parsed_url = urlparse(requested_url)
+        requested_url = self._sanitize_url(requested_url)
 
+        parsed_url = urlparse(requested_url)
         call = Call(domain=parsed_url.netloc,
                     scheme=parsed_url.scheme,
                     method=method,
@@ -76,7 +83,6 @@ class CallUrlRes(Resource):
         s = requests.Session()
         s.mount(requested_url, MyHTTP20Adapter())
         http_method = getattr(s, method.lower())
-        r = None
         try:
             r = http_method(f"{requested_url}", allow_redirects=True)
             for h in r.history:
