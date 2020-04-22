@@ -24,20 +24,20 @@ class CallResultSchema(Schema):
     status_code = fields.String()
     location = fields.String(required=False)
     date = fields.String(required=False)
-    # date = fields.Date(required=False, dateformat="%d/%m/%Y")
     server = fields.String(required=False)
 
 
 class CallSchema(Schema):
-    share_id = fields.Int()
+    share_id = fields.String(attribute="handle")
     requested_url = fields.Url()
     domain = fields.String()
-    scheme = fields.String()
+    schema = fields.String(attribute="scheme")
     method = fields.String()
     path = fields.String()
     status = fields.Int()
     status_msg = fields.String()
     errors = fields.String()
+    date = fields.Date(attribute="created_on", format="%a, %e %b %Y")
     call_results = fields.List(fields.Nested(CallResultSchema))
 
 

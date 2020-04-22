@@ -32,7 +32,6 @@ def down_case_first_letter(s): return s[:1].upper() + s[1:] if s else ''
 def catch_all(path):
     return render_template("index.html")
 
-
 def create_app(pyenv=None):
     """Initialize the core application."""
     py_env = pyenv or down_case_first_letter(os.getenv("FLASK_ENV"))
@@ -49,6 +48,7 @@ def create_app(pyenv=None):
     with app.app_context():
         from .dgt_api.v1_0 import digitest_api as rest_api
         api.add_resource(rest_api.CallUrlRes, '/api/v1.0/request_url/<method>')
+        api.add_resource(rest_api.ShareRes, '/api/v1.0/share/<share_id>')
         app.register_blueprint(__api_bp)
         app.register_blueprint(views_bp)
         return app

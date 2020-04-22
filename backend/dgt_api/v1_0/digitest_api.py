@@ -45,7 +45,7 @@ class CallUrlRes(Resource):
         else:
             protocol += '2'
 
-        return CallResult(status_code=f"{protocol} {h.status_code} {safe_decode(h.reason)}",
+        return CallResult(status_code=f"{protocol} {h.status_code} {self._get_status_name(h.status_code)}",
                           location=safe_param(h.headers, 'location'),
                           date=get_last_date(h.headers),
                           server=safe_param(h.headers, 'server')
@@ -60,6 +60,9 @@ class CallUrlRes(Resource):
 
     def _get_reason(self, status):
         return HTTPStatus(status).description
+
+    def _get_status_name(self, status):
+        return HTTPStatus(status).name.replace('_', ' ')
 
     def _sanitize_url(self, url):
         p = re.compile("(http|https):\/\/")
@@ -113,3 +116,8 @@ class CallUrlRes(Resource):
     def post(self, method):
         requested_url = json.loads(request.data.decode())['requested_url']
         return self._handle_request(method, requested_url)
+
+
+class ShareRes(Resource):
+    def get(self, share_id):
+        print("CallShareRes:" + share_id)
