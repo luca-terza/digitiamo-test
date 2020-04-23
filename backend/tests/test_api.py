@@ -93,5 +93,4 @@ class TestApi:
 
         print('\n***************************************')
         # missing schema
-        result = self._call_url_by_post('GET', json.dumps({"requested_url": "www.google.com"}), client, 406)
-        assert 'No schema supplied' in result['errors']
+        self._call_url_by_post('GET', json.dumps({"requested_url": "www.google.com"}), client, 200)
