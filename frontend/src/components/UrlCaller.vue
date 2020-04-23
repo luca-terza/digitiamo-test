@@ -5,7 +5,7 @@
     </template>
     <b-form-input placeholder='url' size="sm" type='text' v-model='input.url'></b-form-input>
     <b-input-group-append >
-      <b-button size="sm" text="Button"  v-on:click='sendData()' variant="success">Send</b-button>
+      <b-button size="sm"  v-on:click='sendData()' variant="secondary">Send</b-button>
     </b-input-group-append>
   </b-input-group>
 </template>
@@ -16,7 +16,17 @@
     name: 'url-caller',
     data () {
       return {
-        methods: ['GET', 'POST'],
+        methods: [
+          'GET',
+          'POST',
+          'PUT',
+          'DELETE',
+          'HEAD',
+          'OPTIONS',
+          'PATCH',
+          'INFO',
+          'DUMB'
+        ],
         input: {
           method: 'GET',
           url: ''
@@ -26,9 +36,6 @@
     },
     mounted () {},
     methods: {
-      getResult (result) {
-        this.response = result
-      },
       sendData () {
         if (!this.input.url) return
         axios({
@@ -37,16 +44,27 @@
           'data': {'requested_url': this.input.url},
           'headers': {'content-type': 'application/json'}
         }).then(result => {
-          this.getResult(result)
+          this.response = result
+          this.response['final_message'] = result.data.result.status_msg
         }).catch(error => {
           console.log(error)
           if (error.response) {
-            this.getResult(error.response)
+            this.response = error.response
+            this.response['final_message'] = JSON.parse(error.response.data.result.errors).error
           } else if (error.hasOwnProperty('message')) {
-            this.final_message = error.message
+            this.response['final_message'] = error.message
           }
         }).finally(() => this.$emit('call-url', this.response))
       }
     }
   }
 </script>
+<style lang="scss">
+    .some-class {
+      @media (max-width: 567px) {
+        background-color: red;
+      }
+
+    }
+
+</style>

@@ -1,9 +1,9 @@
 <template>
   <b-input-group class="p-4">
     <template v-slot:prepend>
-      <b-btn disabled> {{method}}</b-btn>
+      <b-col class="btn btn-secondary disabled no-hand"> {{method}}</b-col>
     </template>
-    <b-col  class="btn btn-secondary disabled"> {{calledUrl}}</b-col>
+    <b-col class="btn btn-secondary disabled no-hand"> {{calledUrl}}</b-col>
   </b-input-group>
 </template>
 <script>
@@ -11,6 +11,7 @@
     name: 'call-display',
     props: {
       'method': String,
-      'calledUrl': String}
+      'calledUrl': String
+    }
   }
 </script>

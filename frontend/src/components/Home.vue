@@ -1,10 +1,10 @@
 <template>
-  <b-container fluid="md">
+  <b-container fluid="lg">
     <b-row>
-      <b-col md="12" order-md="2">
+      <b-col lg="12" order-lg="2">
 
         <b-form-row >
-          <b-col md="6" offset-md="3">
+          <b-col lg="6" offset-lg="3">
             <template v-if="this.$route.params.shareId">
               <call-display v-bind:called-url="share_link" v-bind:method="response.method" ></call-display>
             </template>
@@ -14,19 +14,19 @@
           </b-col>
         </b-form-row>
       </b-col>
-      <b-col md="12" order-md="1">
+      <b-col lg="12" order-lg="1">
         <b-row >
           <b-col class="text-center stronger-info">
             {{final_status}}
           </b-col>
         </b-row>
         <b-row >
-          <b-col class="text-center" md="6" offset-md="3">
+          <b-col class="text-center" lg="6" offset-lg="3">
             {{final_message}}
           </b-col>
         </b-row>
       </b-col>
-      <b-col md="12" order="3">
+      <b-col lg="12" order="3">
         <b-row class="text-left p-4 result-row" >
           <b-col lg="3" v-if="response.status">
             <ul class="main-result-box">
@@ -65,7 +65,7 @@
           </b-col>
         </b-row>
       </b-col>
-      <b-col md="12" order="4" class="mx-auto">
+      <b-col lg="12" order="4" class="mx-auto">
         <b-row >
           <b-col v-if="response.status">
           <b-row>
@@ -75,10 +75,10 @@
           </b-row>
             <b-row>
               <b-col  v-if="this.$route.params.shareId">
-                <b-col md="5"  class="btn btn-secondary disabled"> {{this.share_link}} </b-col>
+                <b-col lg="5"  class="mx-auto btn btn-secondary disabled no-hand"> {{this.share_link}} </b-col>
               </b-col>
-              <b-col  md="5" class="mx-auto" v-else>
-                <router-link class="btn btn-secondary" v-bind:to="'/' + this.shareId" >
+              <b-col  lg="5" class="mx-auto" v-else>
+                <router-link   class="btn btn-secondary fill-col" v-bind:to="'/' + this.shareId" >
                   {{this.share_link}}
                 </router-link>
               </b-col>
@@ -104,14 +104,8 @@
     },
     data () {
       return {
-        methods: [
-          'GET', 'POST'],
         final_status: '',
         final_message: '',
-        input: {
-          method: 'GET',
-          url: ''
-        },
         response: {},
         share_link: '',
         shareId: ''
@@ -125,7 +119,8 @@
       getResponse (result) {
         this.response = result.data.result
         this.final_status = result.status
-        this.final_message = this.response.status_msg
+        this.final_message = (result.final_message || result.data.result.status_msg)
+
         this.shareId = this.response.share_id
         this.share_link = window.location.host + '/' + this.shareId
       },
@@ -140,6 +135,7 @@
           console.log(error)
           if (error.response) {
             this.getResponse(error.response)
+            this.final_message = JSON.parse(error.response.data.result.errors).error
           } else if (error.hasOwnProperty('message')) {
             this.final_message = error.message
           }
@@ -230,6 +226,12 @@
     display: block;
     padding: 0 0 2px 0px;
     text-decoration: none;
+  }
+  .no-hand{
+    cursor: default;
+  }
+  .fill-col{
+    width: 100%;
   }
 
 </style>

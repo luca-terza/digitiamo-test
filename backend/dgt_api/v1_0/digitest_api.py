@@ -85,8 +85,8 @@ class CallUrlRes(Resource):
                     errors='')
         s = requests.Session()
         s.mount(requested_url, MyHTTP20Adapter())
-        http_method = getattr(s, method.lower())
         try:
+            http_method = getattr(s, method.lower())
             r = http_method(f"{requested_url}", allow_redirects=True)
             for h in r.history:
                 call.call_results.append(self._set_call_result(h))
