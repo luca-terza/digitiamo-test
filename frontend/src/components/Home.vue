@@ -1,108 +1,107 @@
 <template>
-  <b-container>
+  <b-container fluid="md">
     <b-row>
-      <b-col class="text-center">
-        <h1> {{final_status}}</h1>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col class="text-center" cols="6" offset="3">
-        {{final_message}}
-      </b-col>
-    </b-row>
-    <b-form-row>
-      <b-col cols="6" offset="3">
-        <template v-if="this.shareId">
-          <h1>Title</h1>
-          <p>Paragraph 1</p>
-          <p>Paragraph 2</p>
-        </template>
-        <template v-else>
-          <b-input-group class="border rounded p-4">
-            <template v-slot:prepend>
-              <b-form-select :options="methods" size="sm" v-model="input.method" variant="info"></b-form-select>
+      <b-col md="12" order-md="2">
+
+        <b-form-row >
+          <b-col md="6" offset-md="3">
+            <template v-if="this.$route.params.shareId">
+              <call-display v-bind:called-url="share_link" v-bind:method="response.method" ></call-display>
             </template>
-            <b-form-input placeholder='url' size="sm" type='text' v-model='input.url'></b-form-input>
-
-            <b-input-group-append v-if="!this.shareId">
-              <b-button size="sm" text="Button" v-on:click='sendData()' variant="success">Send</b-button>
-            </b-input-group-append>
-          </b-input-group>
-        </template>
+            <template v-else>
+              <url-caller v-bind="response" v-on:call-url="getResponse"></url-caller>
+            </template>
+          </b-col>
+        </b-form-row>
       </b-col>
-    </b-form-row>
-
-    <b-row class="text-left p-4 result-row" offset>
-      <b-col cols="3" v-if="response.status">
-        <ul class="main-result-box">
-          <li class="result-title">URL INFO</li>
-          <li>
-            <ul class="result-element-section">
-              <li class="result-element-title">DOMAIN</li>
-              <li class="result-element">{{this.response.domain}}</li>
+      <b-col md="12" order-md="1">
+        <b-row >
+          <b-col class="text-center stronger-info">
+            {{final_status}}
+          </b-col>
+        </b-row>
+        <b-row >
+          <b-col class="text-center" md="6" offset-md="3">
+            {{final_message}}
+          </b-col>
+        </b-row>
+      </b-col>
+      <b-col md="12" order="3">
+        <b-row class="text-left p-4 result-row" >
+          <b-col lg="3" v-if="response.status">
+            <ul class="main-result-box">
+              <li class="result-title">URL INFO</li>
+              <li>
+                <ul class="result-element-section">
+                  <li class="result-element-title">DOMAIN</li>
+                  <li class="result-element">{{this.response.domain}}</li>
+                </ul>
+              </li>
+              <li>
+                <ul class="result-element-section">
+                  <li class="result-element-title">SCHEME</li>
+                  <li class="result-element">{{this.response.schema}}</li>
+                </ul>
+              </li>
+              <li>
+                <ul class="result-element-section">
+                  <li class="result-element-title">PATH</li>
+                  <li class="result-element">{{this.response.path}}</li>
+                </ul>
+              </li>
             </ul>
-          </li>
-          <li>
-            <ul class="result-element-section">
-              <li class="result-element-title">SCHEME</li>
-              <li class="result-element">{{this.response.schema}}</li>
+          </b-col>
+          <b-col lg="3" v-for="(item,index) in response.call_results" v-bind:key="item.status_code" >
+            <ul class="result-box">
+              <li class="result-title">RESPONSE</li>
+              <li class="result-detail">{{ item.status_code }}</li>
+              <li class="result-detail"
+                  v-if="response.date && (index === response.call_results.length - 1) ">
+                date: {{response.date}}
+              </li>
+              <li class="result-detail" v-if="item.location">Location: {{item.location}}</li>
+              <li class="result-detail" v-if="item.server">Server: {{item.server}}</li>
             </ul>
-          </li>
-          <li>
-            <ul class="result-element-section">
-              <li class="result-element-title">PATH</li>
-              <li class="result-element">{{this.response.path}}</li>
-            </ul>
-          </li>
-        </ul>
+          </b-col>
+        </b-row>
       </b-col>
-      <b-col cols="3" v-for="(item,index) in response.call_results" v-bind:key="item.status_code" >
-        <ul class="result-box">
-          <li class="result-title">RESPONSE</li>
-          <li class="result-detail">{{ item.status_code }}</li>
-          <li class="result-detail"
-              v-if="response.date && (index === response.call_results.length - 1) ">
-            date: {{response.date}}
-          </li>
-          <li class="result-detail" v-if="item.location">Location: {{item.location}}</li>
-          <li class="result-detail" v-if="item.server">Server: {{item.server}}</li>
-        </ul>
-      </b-col>
-    </b-row>
-    <b-row >
-      <b-col>
-      <b-row>
-      <b-col v-if="response.status" class="text-center">
-        SHARE
-      </b-col>
-      </b-row>
-        <b-row>
-        <b-col v-if="response.status"  class=" mx-auto">
-            <router-link class="btn btn-primary" v-bind:to="'/' + this.shareId" >{{this.share_link}}</router-link>
+      <b-col md="12" order="4" class="mx-auto">
+        <b-row >
+          <b-col v-if="response.status">
+          <b-row>
+          <b-col  class="text-center strong-info">
+            SHARE
+          </b-col>
+          </b-row>
+            <b-row>
+              <b-col  v-if="this.$route.params.shareId">
+                <b-col md="5"  class="btn btn-secondary disabled"> {{this.share_link}} </b-col>
+              </b-col>
+              <b-col  md="5" class="mx-auto" v-else>
+                <router-link class="btn btn-secondary" v-bind:to="'/' + this.shareId" >
+                  {{this.share_link}}
+                </router-link>
+              </b-col>
 
-        </b-col>
-
+            </b-row>
+          </b-col>
         </b-row>
       </b-col>
     </b-row>
-
-
-<!--    <b-row >-->
-<!--      <b-col>-->
-<!--        <label>-->
-<!--          <b-textarea cols="90" v-model='response_debug'/>-->
-<!--        </label>-->
-<!--      </b-col>-->
-<!--    </b-row>-->
-
   </b-container>
 </template>
 
 <script>
   import axios from 'axios'
+  import UrlCaller from './UrlCaller.vue'
+  import CallDisplay from './CallDisplay.vue'
 
   export default {
     name: 'HelloWorld',
+    components: {
+      UrlCaller,
+      CallDisplay
+    },
     data () {
       return {
         methods: [
@@ -113,7 +112,6 @@
           method: 'GET',
           url: ''
         },
-        response_debug: '',
         response: {},
         share_link: '',
         shareId: ''
@@ -124,12 +122,12 @@
       if (this.shareId) this.getSharedData(this.shareId)
     },
     methods: {
-      getResult (result) {
+      getResponse (result) {
         this.response = result.data.result
-        this.response_debug = JSON.stringify(this.response).replace(/,/g, '\n')
         this.final_status = result.status
         this.final_message = this.response.status_msg
-        this.share_link = window.location.host + '/' + this.response.share_id
+        this.shareId = this.response.share_id
+        this.share_link = window.location.host + '/' + this.shareId
       },
       getSharedData (shareId) {
         axios({
@@ -137,34 +135,18 @@
           'url': 'http://localhost:5000/api/v1.0/share/' + shareId,
           'headers': {'content-type': 'application/json'}
         }).then(result => {
-          this.getResult(result)
+          this.getResponse(result)
         }).catch(error => {
           console.log(error)
           if (error.response) {
-            this.getResult(error.response)
+            this.getResponse(error.response)
           } else if (error.hasOwnProperty('message')) {
             this.final_message = error.message
           }
+          this.inSharePage = false
         })
 
         console.log('shareId: ' + shareId)
-      },
-      sendData () {
-        axios({
-          method: 'POST',
-          'url': 'http://localhost:5000/api/v1.0/request_url/' + this.input.method,
-          'data': {'requested_url': this.input.url},
-          'headers': {'content-type': 'application/json'}
-        }).then(result => {
-          this.getResult(result)
-        }).catch(error => {
-          console.log(error)
-          if (error.response) {
-            this.getResult(error.response)
-          } else if (error.hasOwnProperty('message')) {
-            this.final_message = error.message
-          }
-        })
       }
     }
   }
@@ -189,7 +171,6 @@
   .result-box {
     @extend .rounded_box;
     min-height: 400px;
-    padding: 0 0 0 0;
   }
 
   .main-result-box {
@@ -215,6 +196,15 @@
     @extend .slight-indent;
     font-size: 1.1em;
     padding-bottom: 20px;
+  }
+
+  .strong-info {
+    font-size: 2em;
+    font-weight: bold;
+  }
+  .stronger-info {
+    font-size: 2.5em;
+    font-weight: bold;
   }
 
   .result-element-title {

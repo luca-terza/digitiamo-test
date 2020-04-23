@@ -121,5 +121,8 @@ class CallUrlRes(Resource):
 class ShareRes(Resource):
     def get(self, share_id):
         call = Call.query.filter_by(handle=share_id).first()
-        schema = CallSchema()
-        return {'result': schema.dump(call)}
+        if call:
+            schema = CallSchema()
+            return {'result': schema.dump(call)}
+        else:
+            return {'result': {}}, 404
