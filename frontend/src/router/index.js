@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 const routerOptions = [
-  { path: '/', component: 'Home' },
-  { path: '/Share', component: 'Share' },
+  { path: '/:shareId?', component: 'Home' },
+  { path: '/share/:shareId?', component: 'Share' },
   { path: '*', component: 'NotFound' }
 ]
 const routes = routerOptions.map(route => {

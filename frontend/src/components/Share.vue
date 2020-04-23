@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col class="text-center">
-        <h1> SHARE</h1>
+        <h1> SHARE {{ $route.params.share_id }}</h1>
       </b-col>
     </b-row>
   </b-container>

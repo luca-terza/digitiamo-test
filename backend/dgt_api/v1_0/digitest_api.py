@@ -120,4 +120,6 @@ class CallUrlRes(Resource):
 
 class ShareRes(Resource):
     def get(self, share_id):
-        print("CallShareRes:" + share_id)
+        call = Call.query.filter_by(handle=share_id).first()
+        schema = CallSchema()
+        return {'result': schema.dump(call)}

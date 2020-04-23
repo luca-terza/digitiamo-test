@@ -12,16 +12,23 @@
     </b-row>
     <b-form-row>
       <b-col cols="6" offset="3">
-        <b-input-group class="border rounded p-4">
-          <template v-slot:prepend>
-            <b-form-select :options="methods" size="sm" v-model="input.method" variant="info"></b-form-select>
-          </template>
-          <b-form-input placeholder='url' size="sm" type='text' v-model='input.url'></b-form-input>
+        <template v-if="this.shareId">
+          <h1>Title</h1>
+          <p>Paragraph 1</p>
+          <p>Paragraph 2</p>
+        </template>
+        <template v-else>
+          <b-input-group class="border rounded p-4">
+            <template v-slot:prepend>
+              <b-form-select :options="methods" size="sm" v-model="input.method" variant="info"></b-form-select>
+            </template>
+            <b-form-input placeholder='url' size="sm" type='text' v-model='input.url'></b-form-input>
 
-          <b-input-group-append>
-            <b-button size="sm" text="Button" v-on:click='sendData()' variant="success">Send</b-button>
-          </b-input-group-append>
-        </b-input-group>
+            <b-input-group-append v-if="!this.shareId">
+              <b-button size="sm" text="Button" v-on:click='sendData()' variant="success">Send</b-button>
+            </b-input-group-append>
+          </b-input-group>
+        </template>
       </b-col>
     </b-form-row>
 
@@ -70,20 +77,23 @@
       </b-col>
       </b-row>
         <b-row>
-        <b-col v-if="response.status"  class=" mx-auto"><b-button size="sm" v-on:click='getSharedData()' >http://localhost:5000/share{{response.share_id}}</b-button></b-col>
+        <b-col v-if="response.status"  class=" mx-auto">
+            <router-link class="btn btn-primary" v-bind:to="'/' + this.shareId" >{{this.share_link}}</router-link>
+
+        </b-col>
 
         </b-row>
       </b-col>
     </b-row>
 
 
-    <b-row>
-      <b-col>
-        <label>
-          <b-textarea cols="90" v-model='response_debug'/>
-        </label>
-      </b-col>
-    </b-row>
+<!--    <b-row >-->
+<!--      <b-col>-->
+<!--        <label>-->
+<!--          <b-textarea cols="90" v-model='response_debug'/>-->
+<!--        </label>-->
+<!--      </b-col>-->
+<!--    </b-row>-->
 
   </b-container>
 </template>
@@ -105,10 +115,13 @@
         },
         response_debug: '',
         response: {},
-        share_link: ''
+        share_link: '',
+        shareId: ''
       }
     },
     mounted () {
+      this.shareId = this.$route.params.shareId
+      if (this.shareId) this.getSharedData(this.shareId)
     },
     methods: {
       getResult (result) {
@@ -116,10 +129,25 @@
         this.response_debug = JSON.stringify(this.response).replace(/,/g, '\n')
         this.final_status = result.status
         this.final_message = this.response.status_msg
-        this.share_link = 'http://localhost:5000/api/v1.0/share/' + this.response.share_id
+        this.share_link = window.location.host + '/' + this.response.share_id
       },
-      getSharedData () {
-        console.log(this.share_link)
+      getSharedData (shareId) {
+        axios({
+          method: 'GET',
+          'url': 'http://localhost:5000/api/v1.0/share/' + shareId,
+          'headers': {'content-type': 'application/json'}
+        }).then(result => {
+          this.getResult(result)
+        }).catch(error => {
+          console.log(error)
+          if (error.response) {
+            this.getResult(error.response)
+          } else if (error.hasOwnProperty('message')) {
+            this.final_message = error.message
+          }
+        })
+
+        console.log('shareId: ' + shareId)
       },
       sendData () {
         axios({
