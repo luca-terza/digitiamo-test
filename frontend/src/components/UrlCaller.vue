@@ -1,9 +1,9 @@
 <template>
-  <b-input-group class="p-4" v-on:keyup.enter='sendData()'>
-    <template v-slot:prepend>
-      <b-form-select :options="methods" size="sm" v-model="input.method" variant="info"></b-form-select>
-    </template>
-    <b-form-input placeholder='url' size="sm" type='text' v-model='input.url'></b-form-input>
+  <b-input-group class="p-2 border rounded slight-evidence no-outline" v-on:keyup.enter='sendData()'>
+    <b-input-group-prepend>
+      <b-form-select :options="methods" size="sm" v-model="input.method" class=" select-method"></b-form-select>
+    </b-input-group-prepend>
+    <b-form-input placeholder='type URL here' size="sm" type='text' class="slight-evidence input-border" v-model='input.url'></b-form-input>
     <b-input-group-append >
       <b-button size="sm"  v-on:click='sendData()' variant="secondary">Send</b-button>
     </b-input-group-append>
@@ -59,12 +59,3 @@
     }
   }
 </script>
-<style lang="scss">
-    .some-class {
-      @media (max-width: 567px) {
-        background-color: red;
-      }
-
-    }
-
-</style>

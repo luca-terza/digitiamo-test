@@ -6,7 +6,7 @@ import logging
 class BaseConfig(object):
     CSRF_ENABLED = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    APP_VERSION = "0.0.1"     # Version number
+    APP_VERSION = "0.1.0"     # Version number
     # adding version at the end of secret key to invalidate old tokens after new release
     SECRET_KEY = 'T\xc4<\xd1\xdf\xf5*7<u>=\xa0\x9f\x8e\xe7>\x81O\x18I\x02\x90\x89'+APP_VERSION
     logger = logging.getLogger('digi-test')
