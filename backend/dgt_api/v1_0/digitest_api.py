@@ -52,7 +52,7 @@ class CallUrlRes(Resource):
                           )
 
     def _status_from_ex(self, e):
-        ex_dict = {requests.exceptions.MissingSchema: 406, 'default': 404}
+        ex_dict = {requests.exceptions.MissingSchema: 406, 'default': 501}
         try:
             return ex_dict[type(e)]
         except KeyError:
@@ -99,7 +99,7 @@ class CallUrlRes(Resource):
             else:
                 msg = e
             call.errors += f'{{"error": "{msg}" }}'
-            call.status = self._status_from_ex(e)
+            call.status = 501
         db.session.add(call)
         db.session.commit()
         call.handle = f"{self._create_random_handle()}{call.id}"

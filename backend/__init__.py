@@ -10,21 +10,25 @@ from flask_migrate import Migrate
 from backend.helpers import IPCache
 from flask_cors import CORS
 
+
+def down_case_first_letter(s): return s[:1].upper() + s[1:] if s else ''
+
 db = SQLAlchemy()
 ma = Marshmallow()
 __api_bp = Blueprint('api', __name__)
 api = Api(__api_bp)
 r_log = logging.getLogger('digi-test')
 r_log.info(f'working in => {os.getcwd()}')
+    
 app = Flask(__name__,
-            static_folder="../frontend/dist/static",
-            template_folder="../frontend/dist")
+    static_folder = "static",
+    template_folder = "templates"
+    )
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 ip_cache = IPCache(max_size=50)
 views_bp = Blueprint('call_url_views', __name__)
 
 
-def down_case_first_letter(s): return s[:1].upper() + s[1:] if s else ''
 
 
 @views_bp.route('/', defaults={'path': ''})

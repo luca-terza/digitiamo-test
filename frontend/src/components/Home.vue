@@ -2,7 +2,6 @@
   <b-container fluid="lg">
     <b-row>
       <b-col lg="12" order-lg="2">
-
         <b-form-row >
           <b-col lg="6" offset-lg="3">
             <template v-if="this.$route.params.shareId">
@@ -153,17 +152,21 @@
     width: 600px;
     height: 200px;
   }
-
+  $box-light-color: #f6f6f6;
+  $box-slight-dark-color: #f2f2f2;
   .rounded_box {
-    border: 1px solid #f6f6f6;
+    border: 1px solid $box-light-color;
     border-radius: .25rem
+  }
+
+  .slight-evidence {
+    background-color: $box-slight-dark-color;
   }
 
   .slight-indent {
     padding: 0 0 2px 5px;
   }
 
-  $box-light-color: #f6f6f6;
   .result-box {
     @extend .rounded_box;
     min-height: 400px;
@@ -224,7 +227,7 @@
 
   ul li {
     display: block;
-    padding: 0 0 2px 0px;
+    padding: 0 0 2px 0;
     text-decoration: none;
   }
   .no-hand{
@@ -233,5 +236,11 @@
   .fill-col{
     width: 100%;
   }
-
+  .select-method {
+    background: none;
+  }
+  .input-border {
+    border: none;
+    margin-left: 1px !important;;
+  }
 </style>
