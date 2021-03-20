@@ -7,7 +7,7 @@ Flask-cors==3.0.8
 marshmallow==3.5.1
 marshmallow-sqlalchemy==0.22.3
 hyper==0.7.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 Werkzeug==1.0.1
 pytest-flask==1.0.0
